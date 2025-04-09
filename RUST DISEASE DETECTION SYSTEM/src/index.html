@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Prediction Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #a94545;
+            border-radius: 5px;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .file-list {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #c2bc6e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .prediction {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .file-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Model Prediction Interface</h1>
+    
+    <form id="upload-form" enctype="multipart/form-data">
+        <div class="upload-section">
+            <h3>Keras Model Images</h3>
+            <div class="file-input">
+                <label for="keras-images">Select images for Keras model:</label>
+                <input type="file" id="keras-images" name="img_files" multiple accept=".jpg, .jpeg, .png" required>
+                <div id="keras-files" class="file-list"></div>
+            </div>
+        </div>
+
+        
+
+        <button type="submit">Run Predictions</button>
+    </form>
+    
+    <div id="results"></div>
+
+    <script>
+        // Function to update file list display
+        function updateFileList(inputElement, listElement) {
+            const files = inputElement.files;
+            listElement.innerHTML = Array.from(files)
+                .map(file => `<div class="file-info">${file.name} (${(file.size / 1024).toFixed(2)} KB)</div>`)
+                .join('');
+        }
+
+        // Add file list display listeners
+        document.getElementById('keras-images').addEventListener('change', function() {
+            updateFileList(this, document.getElementById('keras-files'));
+        });
+        
+
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = '<p>Processing Please wait.</p>';
+            
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Something wrong with the network');
+                }
+                return response.json();
+            })
+            .then(data => {
+                resultsDiv.innerHTML = '<h2>Predictions:</h2>';
+                data.predictions.forEach(prediction => {
+                    const predDiv = document.createElement('div');
+                    predDiv.className = 'prediction';
+                    predDiv.textContent = prediction;
+                    resultsDiv.appendChild(predDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultsDiv.innerHTML = '<p style="color: red;">Error occurred. Try again.</p>';
+            });
+        });
+    </script>
+</body>
+</html>
