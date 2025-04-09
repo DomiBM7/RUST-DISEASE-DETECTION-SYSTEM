@@ -1,7 +1,7 @@
 # Beyond Visible Spectrum AI for Agriculture
 
 ## Author
-BUKASA MUYOMBO 2
+BUKASA MUYOMBO 
 
 ## Project Overview
 A deep learning model for detecting plant diseases using spectral imaging, incorporating HOG (Histogram of Oriented Gradients) and LBP (Local Binary Pattern) features for enhanced disease classification.
